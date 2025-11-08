@@ -10,6 +10,7 @@ if (!rootElement) {
   throw new Error('Root element with id "root" not found')
 }
 
+console.log(rootElement)
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
