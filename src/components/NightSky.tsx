@@ -16,10 +16,14 @@ type GeneratedStar = {
   scale: number
   twinkleDelay: number
   twinkleDuration: number
+  colorHue: number
+  colorSaturation: number
+  glowIntensity: number
+  shapeVariation: number
 }
 
-const STAR_COUNT = 220
-const STAR_LAYERS = 4
+const STAR_COUNT = 750
+const STAR_LAYERS = 3
 
 const createRng = (seed: number) => {
   let state = seed >>> 0
@@ -40,6 +44,30 @@ const createStarPositions = (count: number, seedOffset: number) =>
     const scale = 0.35 + random() * 1
     const twinkleDelay = random() * 14
     const twinkleDuration = 3 + random() * 5.5
+    
+    // Color variation: mostly white/blue-white, occasional warm tones
+    const colorType = random()
+    let colorHue: number
+    let colorSaturation: number
+    if (colorType < 0.7) {
+      // Blue-white stars (most common)
+      colorHue = 200 + random() * 20 // 200-220 (blue range)
+      colorSaturation = 20 + random() * 30 // 20-50%
+    } else if (colorType < 0.9) {
+      // Pure white stars
+      colorHue = 0
+      colorSaturation = 0
+    } else {
+      // Warm stars (yellow/amber)
+      colorHue = 30 + random() * 30 // 30-60 (yellow/amber range)
+      colorSaturation = 40 + random() * 40 // 40-80%
+    }
+    
+    // Glow intensity variation
+    const glowIntensity = 0.6 + random() * 0.4 // 0.6-1.0
+    
+    // Slight shape variation (border-radius and size tweaks)
+    const shapeVariation = random() // 0-1 for variation amount
 
     return {
       id: `${seedOffset}-${index}`,
@@ -48,6 +76,10 @@ const createStarPositions = (count: number, seedOffset: number) =>
       scale,
       twinkleDelay,
       twinkleDuration,
+      colorHue,
+      colorSaturation,
+      glowIntensity,
+      shapeVariation,
     }
   }) satisfies GeneratedStar[]
 
@@ -131,13 +163,13 @@ const NightSky = () => {
     let timeoutId: number | undefined
 
     const spawnShootingStar = () => {
-      const duration = 1.2 + Math.random() * 0.8
+      const duration = 0.1 + Math.random() * 0.1
       const star: ShootingStar = {
         id: starIdRef.current++,
         top: Math.random() * 40,
         left: 40 + Math.random() * 20,
         duration,
-        delay: Math.random() * 0.3,
+        delay: 0,
       }
 
       setShootingStars((prev) => [...prev, star])
@@ -186,6 +218,10 @@ const NightSky = () => {
                 transform: `scale(${star.scale})`,
                 '--twinkle-delay': `${star.twinkleDelay}s`,
                 '--twinkle-duration': `${star.twinkleDuration}s`,
+                '--star-hue': star.colorHue,
+                '--star-saturation': `${star.colorSaturation}%`,
+                '--glow-intensity': star.glowIntensity,
+                '--shape-variation': star.shapeVariation,
               } as CSSProperties}
             />
           ))}
@@ -196,16 +232,16 @@ const NightSky = () => {
 
       <div className="shooting-star-layer" aria-hidden>
         {shootingStars.map((star) => (
-          <span
-            key={star.id}
-            className="shooting-star"
-            style={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              animationDuration: `${star.duration}s`,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
+          <div key={star.id} className="shooting-star-container" style={{
+            top: `${star.top}%`,
+            left: `${star.left}%`,
+            animationDuration: `${star.duration}s`,
+          }}>
+            <span className="shooting-star" />
+            <span className="shooting-star-spark spark-1" />
+            <span className="shooting-star-spark spark-2" />
+            <span className="shooting-star-spark spark-3" />
+          </div>
         ))}
       </div>
 
