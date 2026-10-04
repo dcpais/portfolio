@@ -1,17 +1,18 @@
-import Navbar from './components/Navbar'
-import About from './components/About'
-import Projects from './components/Projects'
-import Contact from './components/Contact'
+import { useViewMode, VIEW_MODES } from './hooks/useViewMode'
+import PortholeView from './views/PortholeView'
+import FlatView from './views/FlatView'
 
 export default function App() {
+  const { mode, chooseMode, reducedMotion } = useViewMode()
+
+  if (mode === VIEW_MODES.flat) {
+    return <FlatView onResume={() => chooseMode(VIEW_MODES.porthole)} />
+  }
+
   return (
-    <div className="bg-neutral-950 text-neutral-100 min-h-screen">
-      <Navbar />
-      <main>
-        <About />
-        <Projects />
-        <Contact />
-      </main>
-    </div>
+    <PortholeView
+      reducedMotion={reducedMotion}
+      onAbort={() => chooseMode(VIEW_MODES.flat)}
+    />
   )
 }
